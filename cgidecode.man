@@ -1,0 +1,102 @@
+.TH cgidecode 1 "2015"
+.SH cgidecode
+.B cgidecode
+\- decode url-encoded and multipart-encoded data
+.SH SYNOPSIS
+#ifdef REGEX
+.B cgidecode  [-V][-q][-D 
+directory 
+.B ] [-C 
+suffix
+.B ] [-e 
+encoding
+.B ]
+[varname-regex \.\.\.]
+#else /* !REGEX */
+.B cgidecode  [-V][-q][-D 
+directory 
+.B ] [-C 
+suffix
+.B ] [-e
+encoding
+.B ] 
+[varname \.\.\.]
+#endif /* !REGEX */
+.SH DESCRIPTION
+The cgidecode utility decodes url-encoded or multipart-encoded data provided to it on
+stdin, and extracts from that data the name and value of any variable whose name
+matches a variable name argument on the command line.
+.PP
+The arguments indicate variable names to be looked for in the data. Variable
+names in the data that are not specified on the command line are ignored.
+.PP
+If the data is URL-encoded, the name and value of each variable
+in the input whose name matches one of the variable name arguments is output to stdout, 
+in the form 
+.B "varname=value"
+.PP
+If the data is multipart-encoded, the name of each variable
+whose name matches one of the variable name arguments is output to stdout, followed by
+a space, then any content-disposition parameters, if present, such as 
+.B filename="myfilename".
+Finally, it also displays
+.B contenttype="conttent/type"
+(if present in the data for that variable). All these are output on a single line, separated by semicolons.
+#ifdef REGEX
+.PP
+Variable name arguments are specified on the command line as POSIX regular expressions.
+#endif /* REGEX */
+
+.SH OPTIONS
+.TP
+.B \-e encoding
+The type of encoding that 
+.B cgidecode
+expects as input. 
+Encoding can be "url", "multipart", or "autodetect" (the default).  
+.TP
+.B \-V
+Display version information and exit.
+.TP
+.B \-q
+Quiet mode.  Do not output anything to stdout.
+.TP
+.B \-D directory
+Create the specified directory (which must not exist) and, for
+each matching variable name, create a file in that directory whose name
+is the name of the variable, and whose content is the value of the variable.
+If a variable appears more than once, a subdirectory named after the variable
+is created, and each value of that variable is written as a file in that
+subdirectory, named "0", "1", "2", etc. in order of appearance.
+.TP
+.B \-C suffix
+Suffix for a subdirectory in above directory to hold content-disposition 
+parameters and content-type, if any. 
+
+For example, if suffix is ".cdisp", and variable "myvariable" has a content-type, then that content-type
+will be saved in a file called "directory/myvariable.cdisp/content-type"
+or e.g. "directory/myvariable/1.cdisp/content-type" (in the case of multiple
+instances of "myvariable").
+Has no effect if directory is not specified.
+Content-disposition parameters are applicable only to multipart-encoded data.
+The suffix should be chosen so that forms will not have variable names
+such that a matching variable name, with the suffix appended, will be the same
+as another matching variable name in the form.  
+.SH EXAMPLE
+.TP
+.RS
+.RE
+cgidecode -e multipart -D mydir -C .cdisp myfile <form-data
+.RS
+echo Upload filename is: `cat mydir/myfile.cdisp/filename`
+.RE
+.RS
+echo Upload filetype is: `cat mydir/myfile.cdisp/content-type`
+.RE
+.RS
+echo Upload filesize is: `du -s mydir/myfile`
+.RE
+.SH IDIOSYNCRASIES
+CRLF is mapped to LF in the UNIX fashion.  Only content-disposition parameters mentioned in rfc2183 are recognized. 
+.SH AUTHOR
+John DiMarco <jdd@cs.toronto.edu>

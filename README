@@ -1,0 +1,24 @@
+Sep 11, 2015	Release 1.0
+
+cgidecode unpacks url-encoded or multipart-encoded data and mades it
+available to shell scripts, via files.
+
+Why would you want this?  It takes care of the parsing, letting you write
+very simple CGIs in your favourite scripting language, e.g.  sh.
+
+Installation: compile via "make".  Configure via editing Makefile. This
+software requires a version of lex (e.g. flex), and the generation of the
+manual pages requires a C preprocessor (cpp), which can sometimes be in an
+odd location (e.g. /usr/ccs/lib/cpp on Solaris).  Install the executable by
+hand in your chosen location, and, if you wish, the manual page, cgidecode.1
+
+It's been tested on Linux, Solaris, OpenBSD, and Windows/Cygwin, and should run
+on pretty much any UNIX-like system.
+
+Comments, bug reports, fixes, enhancements, etc. are welcome.
+
+John
+--
+John DiMarco  <jdd@cs.toronto.edu>  http://www.cs.toronto.edu/~jdd
+IT Director, Department of Computer Science, University of Toronto  
+Office: SF3302  1-416-978-5300  Fx:1-416-946-5464  Skype:jddimarco
