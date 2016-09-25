@@ -1,0 +1,18 @@
+-----------------------------41184676334
+Content-Disposition: form-data; name="name"
+
+defaultname
+-----------------------------41184676334
+Content-Disposition: form-data; name="user"
+
+defaultuser
+-----------------------------41184676334
+Content-Disposition: form-data; name="myfile"; filename="alan-oct07-mar08.xls"
+Content-Type: application/vnd.ms-excel
+
+CONTENTCONTENTCONTENT
+-----------------------------41184676334
+Content-Disposition: form-data; name="thoughts"
+
+defaultthoughts
+-----------------------------41184676334--

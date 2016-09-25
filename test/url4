@@ -1,0 +1,1 @@
+text=def%32aul-ttext&foo=1&myfile=&thoughts=I+would+like+to+say%3A%0D%0A%0D%0A+++++++++++++++c%5B0%5D%3D%28char%29strtol%28%28char+*%29%28yytext%2B1%29%2C+NULL%2C+16%29%3B+%0D%0A++++++++++++++++c%5B1%5D%3D%27%5C0%27%3B+%0D%0A++++++++++++++++strcat%28t%2C+%28char+*%29c%29%3B%0D%0A++++++++%7D%0D%0A
