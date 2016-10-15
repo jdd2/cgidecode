@@ -6,6 +6,18 @@
 	echo Upload filename is: `cat mydir/myfile.cdisp/filename`
 	echo Upload filetype is: `cat mydir/myfile.cdisp/content-type`
 	echo Upload filesize is: `du -s mydir/myfile`
+## Simple CGI Example
+	#!/bin/sh
+	export TMPDIR=/tmp/$$memo$UNIQUE_ID
+	trap "rm -rf $TMPDIR" 0 1 2 15
+	echo "Content-type: text/html"; echo ""
+	test "POST" = "$REQUEST_METHOD" && cgidecode -q -D $TMPDIR memo
+	cp $TMPDIR/memo /var/www/memo 2>/dev/null
+	echo '<html><body>'
+	echo '<form action='`basename $0`' enctype="multipart/form-data" method=post>'
+	echo "<textarea name=memo>`cat /var/www/memo 2>/dev/null`</textarea>"
+	echo '<input type=submit><input type=reset></form>'
+	echo '</body></html>'
 ## Motivation
 A shell script makes a good simple CGI language, given a way to convert
 url-encoded or multipart-encoded data into a format that is easy for
