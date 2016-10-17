@@ -6,6 +6,8 @@
 #ifdef REGEX
 .B cgidecode  [-V][-q][-D 
 directory 
+.B ][-r][-M
+maxsize
 .B ] [-C 
 suffix
 .B ] [-e 
@@ -15,6 +17,8 @@ encoding
 #else /* !REGEX */
 .B cgidecode  [-V][-q][-D 
 directory 
+.B ][-r][-M
+maxsize
 .B ] [-C 
 suffix
 .B ] [-e
@@ -28,7 +32,7 @@ stdin, and extracts from that data the name and value of any variable whose name
 matches a variable name argument on the command line.
 .PP
 The arguments indicate variable names to be looked for in the data. Variable
-names in the data that are not specified on the command line are ignored.
+names in the data that are not specified on the command line will not be seen, and are ignored.
 .PP
 If the data is URL-encoded, the name and value of each variable
 in the input whose name matches one of the variable name arguments is output to stdout, 
@@ -62,12 +66,26 @@ Display version information and exit.
 Quiet mode.  Do not output anything to stdout.
 .TP
 .B \-D directory
-Create the specified directory (which must not exist) and, for
-each matching variable name, create a file in that directory whose name
-is the name of the variable, and whose content is the value of the variable.
-If a variable appears more than once, a subdirectory named after the variable
-is created, and each value of that variable is written as a file in that
-subdirectory, named "0", "1", "2", etc. in order of appearance.
+Create the specified directory. If the directory already exists, an error
+is reported, unless the -r flag is used.  For each matching variable name,
+create a file in that directory whose name is the name of the variable,
+and whose content is the value of the variable.  If a variable appears
+more than once, a subdirectory named after the variable is created, and
+each value of that variable is written as a file in that subdirectory,
+named "0", "1", "2", etc. in order of appearance.
+.TP
+.B \-r
+Reuse the directory specified via -D, if it already exists.  If it contains
+files/subdirectories with names the same as variables seen by cgidecode, 
+cgidecode will behave as it does in the case where a variable is seen more 
+than once, as described in the description for -D above.
+.TP
+.B \-M maxsize
+Specify the maximum size of input that will be read. Append "k" or "K" to
+multiply by 1000, "m" or "M" by a million, and "g" or "G" by a billion.
+If a desired variable is being read when the maxsize limit is reached, a 
+truncated value will be used.  Any variables in the input beyond the 
+maxsize limit will be ignored.
 .TP
 .B \-C suffix
 Suffix for a subdirectory in above directory to hold content-disposition 

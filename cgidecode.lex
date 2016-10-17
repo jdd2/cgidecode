@@ -26,10 +26,10 @@
 
 /* Input buffer sizes.  BUFFSIZE should be greater than LINESIZE */
 #ifndef BUFFSIZE
-#define BUFFSIZE 4096
+#define BUFFSIZE 16384
 #endif /* BUFFSIZE */
 #ifndef LINESIZE
-#define LINESIZE 1024
+#define LINESIZE 8192
 #endif /* LINESIZE */
 
 /* default permissions for directories created */
@@ -72,7 +72,7 @@ char *cdparam[] = {
 
 char *progname, *t, *f, **vars, *dir=NULL, *cd=NULL;
 FILE *fp;
-int numvars, match=0, ismultipart=MAYBE;
+int numvars, match=0, ismultipart=MAYBE, dirreuse=NO;
 u_long globalmax=0, bytes=0;
 
 enum mode {
@@ -87,7 +87,7 @@ enum mode {
  * is the first argument and the string being matched is the second).
  */
 #ifdef REGEX
-#define USAGE "Usage: "PROGNAME" [-V][-q][-C directory][-D directory][-e "URL"|"MULTIPART"|"AUTODETECT"] [varname-regex ...]\n"
+#define USAGE "Usage: "PROGNAME" [-V][-q][-C directory][-D directory][-r][-M maxsize][-e "URL"|"MULTIPART"|"AUTODETECT"] [varname-regex ...]\n"
 #include <regex.h>
 int strmatch(char *expression, char *str){
 	regex_t re;
@@ -111,7 +111,7 @@ int strmatch(char *expression, char *str){
 	}
 } 
 #else /* !REGEX */
-#define USAGE "Usage: "PROGNAME" [-V][-q][-C directory][-D directory][-e "URL"|"MULTIPART"|"AUTODETECT"] [varname ...]\n"
+#define USAGE "Usage: "PROGNAME" [-V][-q][-C directory][-D directory][-r][-M maxsize][-e "URL"|"MULTIPART"|"AUTODETECT"] [varname ...]\n"
 int strmatch(char *expression, char *str){
 	return(strcmp(expression, str));
 }
@@ -357,7 +357,7 @@ void multipart(){
 	 *
 	 */
 	char buf[BUFFSIZE], headbuf[LINESIZE+2], *header, name[BUFFSIZE];
-	int firsttime=1; /* first time through loop? */
+	int firsttime=YES; /* first time through loop? */
 
 	/* the header is the part that looks like this:
 	 * "-----------------------------23281168279961".  We distinguish
@@ -369,7 +369,7 @@ void multipart(){
 	 */
 	headbuf[0]='\r'; headbuf[1]='\n'; headbuf[2]='\0'; 
 	header=headbuf+2;
-	if(NULL==Mgets(header,LINESIZE,stdin)) {
+	if(NULL==Mgets(header,sizeof(headbuf)-(header-headbuf),stdin)) {
 		if(ERANGE==errno) {
 			Error("Maximum input size exceeded."); 
 		} else {
@@ -386,7 +386,7 @@ void multipart(){
 		char *appendix; 
 
 		if(firsttime) {
-			firsttime=0;
+			firsttime=NO;
 		} else {
 			/* next read is either "--" if final EOF, or
 			 * a blank line if there is more to read 
@@ -665,7 +665,7 @@ int main(int argc, char *argv[]){
 	progname=argv[0];
 
 	opterr=0;
-	while(0<=(a=getopt(argc,argv,"VqD:C:M:e:"))){
+	while(0<=(a=getopt(argc,argv,"VqD:C:M:e:r"))){
 		switch(a){
 		case 'V':
 			/* version information */
@@ -695,7 +695,7 @@ int main(int argc, char *argv[]){
 			 * and the contents of which are the variable value.
 			 */
 			dir=optarg;
-			if(0!=mkdir(dir, (mode_t)FILEMODE)) Perr(progname);
+			if(0!=mkdir(dir, (mode_t)FILEMODE) && !((errno==EEXIST)&&dirreuse)) Perr(progname);
 			break;
 		case 'e':
 			if(0==strcmp(optarg,URL)){
@@ -711,8 +711,36 @@ int main(int argc, char *argv[]){
 			fclose(stdout);
 			break;
 		case 'M':
-			/* maximum size of input. Undocumented for now */
-			globalmax=atol(optarg);
+			/* maximum size of input. */
+			switch(optarg[strlen(optarg)-1]){
+			case 'k':
+			case 'K':
+				optarg[strlen(optarg)-1]='\0';
+				globalmax=atol(optarg)*1000;
+				break;
+			case 'm':
+			case 'M':
+				optarg[strlen(optarg)-1]='\0';
+				globalmax=atol(optarg)*1000000;
+				break;
+			case 'g':
+			case 'G':
+				optarg[strlen(optarg)-1]='\0';
+				globalmax=atol(optarg)*1000000000;
+				break;
+			default:
+				globalmax=atol(optarg);
+				break;
+			}
+			if(0==globalmax){
+				fprintf(stderr, "%s: can't parse maximum input size '%s'\n", 
+					progname, optarg);
+				Error(USAGE);
+			} 
+			break;
+		case 'r':
+			/* allow directory to be reused */
+			dirreuse=YES;
 			break;
 		case '?':
 			fprintf(stderr, "%s: Unknown parameter %c\n", 

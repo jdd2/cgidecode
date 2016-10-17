@@ -3,6 +3,7 @@ DISCLAIMER                              Legal disclaimer
 MANIFEST                                This file
 Makefile                                makefile
 README                                  Read this file first
+README.md				More to read, in markdown
 patchlevel.h                            Patch level/version 
 cgidecode.lex				cgidecode source
 cgidecode.man				cgidecode manual page
